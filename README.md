@@ -1,4 +1,4 @@
-# Yash Khambhatta
+# Hey there, I'm Yash!
 
 ## Full-Stack Developer | India
 
