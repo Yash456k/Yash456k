@@ -7,7 +7,7 @@
 
 ### About Me
 
-I'm a passionate full-stack developer with a keen interest in building robust and scalable web applications. Currently pursuing a B.Tech in Computer Engineering at Indus Institute of Technology and Engineering, I'm constantly expanding my skills in modern web technologies. I have a strong foundation in the MERN stack and I'm particularly enthusiastic about React, Next.js, and exploring DevOps practices. I enjoy contributing to open-source projects and solving complex problems. With experience in developing real-time chat platforms and AI-integrated applications, I'm always excited to take on new challenges and create innovative solutions.
+I'm a Fullstack dev, part time intern and currently pursuing B.Tech. Specialize in MERN. Love React, Next.js, and DevOps. I enjoy contributing to open-source projects.
 
 👨‍💻 Check out my portfolio: [https://yash456k.vercel.app/]
 
