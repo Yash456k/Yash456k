@@ -2,7 +2,7 @@
 
 ## Full-Stack Developer | India
 
-[![Profile Views](https://komarev.com/ghpvc/?username=yash456k&label=Profile%20views&color=0e75b6&style=flat)](https://github.com/yash456k)
+
 [![Twitter Follow](https://img.shields.io/twitter/follow/yash654k?style=social)](https://twitter.com/yash654k)
 
 ### About Me
