@@ -7,7 +7,7 @@
 
 ### About Me
 
-I'm a Fullstack dev, part time intern and currently pursuing B.Tech. Specialize in MERN. Love React, Next.js, and DevOps. I enjoy contributing to open-source projects.
+I'm a Fullstack dev and part time intern.I enjoy contributing to open-source projects sometimes.
 
 👨‍💻 Check out my portfolio: [https://yashx.me/]
 
