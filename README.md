@@ -1,6 +1,6 @@
 # Hey there, I'm Yash!
 
-## Full-Stack Developer | India
+## Full-stack Developer
 
 
 [![Twitter Follow](https://img.shields.io/twitter/follow/yash654k?style=social)](https://twitter.com/yash654k)
