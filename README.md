@@ -9,7 +9,7 @@
 
 I'm a Fullstack dev, part time intern and currently pursuing B.Tech. Specialize in MERN. Love React, Next.js, and DevOps. I enjoy contributing to open-source projects.
 
-👨‍💻 Check out my portfolio: [https://yash456k.vercel.app/]
+👨‍💻 Check out my portfolio: [https://yashx.me/]
 
 
 ### Connect with Me
