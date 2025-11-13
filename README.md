@@ -2,11 +2,6 @@
 
 ## Full-stack Developer
 
-
-[![Twitter Follow](https://img.shields.io/twitter/follow/yash654k?style=social)](https://twitter.com/yash654k)
-
-### About Me
-
 I'm a Fullstack dev and part time intern.I enjoy contributing to open-source projects sometimes.
 
 👨‍💻 Check out my portfolio: [https://yashx.me/]
