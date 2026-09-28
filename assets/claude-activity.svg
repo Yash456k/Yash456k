@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="640" height="386" viewBox="0 0 640 386" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif" role="img" aria-labelledby="t d">
 <title id="t">Claude Code activity</title>
-<desc id="d">646.4M tokens since Jun 12, 2026, a daily average of 64.6M, and a peak of 240.1M on Sep 24, 2026.</desc>
+<desc id="d">647.0M tokens since Jun 12, 2026, a daily average of 64.7M, and a peak of 240.1M on Sep 24, 2026.</desc>
 <rect x="8" y="14" width="624" height="372" rx="20" fill="#645443"/>
 <rect x="4" y="7" width="632" height="372" rx="21" fill="#453b31"/>
 <rect x="0.5" y="0.5" width="639" height="371" rx="22" fill="#292623" stroke="#4b443d"/>
@@ -18,11 +18,11 @@
 <text x="615" y="45" fill="#c8beb3" font-size="10" text-anchor="end"><tspan fill="#f59a74">●</tspan>  Updated daily</text>
 <path d="M25 77.5H615M25 172.5H615" stroke="#4b443d"/>
 <text x="25.0" y="103" fill="#c8beb3" font-size="9.5" font-weight="600" letter-spacing="0.8">TOTAL TOKENS</text>
-<text x="25.0" y="143" fill="#fffaf0" font-size="40" font-weight="500" letter-spacing="-0.5">646.4M</text>
+<text x="25.0" y="143" fill="#fffaf0" font-size="40" font-weight="500" letter-spacing="-0.5">647.0M</text>
 <text x="25.0" y="161" fill="#c8beb3" font-size="10">since Jun 12, 2026</text>
 <path d="M246.2 77.5V172.5" stroke="#4b443d"/>
 <text x="262.2" y="103" fill="#c8beb3" font-size="9.5" font-weight="600" letter-spacing="0.8">DAILY AVG</text>
-<text x="262.2" y="131" fill="#fffaf0" font-size="28" font-weight="500" letter-spacing="-0.5">64.6M</text>
+<text x="262.2" y="131" fill="#fffaf0" font-size="28" font-weight="500" letter-spacing="-0.5">64.7M</text>
 <text x="262.2" y="161" fill="#c8beb3" font-size="10">per active day</text>
 <path d="M430.6 77.5V172.5" stroke="#4b443d"/>
 <text x="446.6" y="103" fill="#c8beb3" font-size="9.5" font-weight="600" letter-spacing="0.8">PEAK</text>
