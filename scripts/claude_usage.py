@@ -13,6 +13,7 @@ Run with --push to commit and push the card when it changes.
 from __future__ import annotations
 
 import argparse
+import base64
 import glob
 import json
 import os
@@ -24,13 +25,25 @@ from zoneinfo import ZoneInfo
 REPO = Path(__file__).resolve().parents[1]
 HISTORY_PATH = REPO / "data" / "claude-usage.json"
 CARD_PATH = REPO / "assets" / "claude-activity.svg"
+FONT_DIR = REPO / "assets" / "fonts"
 TRANSCRIPT_ROOTS = [os.path.expanduser("~/.claude/projects"), *glob.glob("/mnt/c/Users/*/.claude/projects")]
 TZ = ZoneInfo("Asia/Kolkata")
 
 # Colors follow the activity card on yash456k.com, in a terracotta ramp for Claude.
 BG, EDGE, INK, MUTED, EMPTY = "#292623", "#4b443d", "#fffaf0", "#c8beb3", "#322e2a"
 LEVELS = ["#55372e", "#8f4c38", "#c0654a", "#f59a74"]
-FONT = "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif"
+
+
+def font_faces(*faces: tuple[str, str, int, str]) -> str:
+    """Inline fonts as data URIs; GitHub shows SVGs as images, which can't load anything else."""
+    css = []
+    for family, file, weight, style in faces:
+        data = base64.b64encode((FONT_DIR / file).read_bytes()).decode()
+        css.append(
+            f"@font-face{{font-family:'{family}';font-weight:{weight};font-style:{style};"
+            f"src:url(data:font/woff2;base64,{data}) format('woff2')}}"
+        )
+    return "".join(css)
 
 
 def scan_transcripts() -> dict[str, dict[str, int]]:
@@ -95,58 +108,65 @@ def render(days: dict[str, dict[str, int]], today: date) -> str:
     counts = sorted(t["tokens"] for t in active.values())
     thresholds = [counts[int((len(counts) - 1) * f)] for f in (0.5, 0.75, 0.95)]
 
-    width, pad, pitch, cell, weeks = 640, 25, 10.5, 8, 53
-    grid_x, grid_y = pad + 30, 228
+    width, height, pad = 860, 446, 32
+    pitch, cell, weeks = 14.35, 11, 53
+    grid_x, grid_y = pad + 34, 258
     calendar_end = today + timedelta(days=(5 - today.weekday()) % 7)  # through Saturday
     calendar_start = calendar_end - timedelta(days=weeks * 7 - 1)
-    height = 372
 
     out = [
-        f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height + 14}" '
-        f'viewBox="0 0 {width} {height + 14}" font-family="{FONT}" role="img" aria-labelledby="t d">',
+        f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" '
+        f'viewBox="0 0 {width} {height}" role="img" aria-labelledby="t d">',
         '<title id="t">Claude Code activity</title>',
         f'<desc id="d">{short(total)} tokens since {long_date(first_day)}, a daily average of '
         f'{short(total / len(active))}, and a peak of {short(active[peak_day]["tokens"])} on '
         f'{long_date(date.fromisoformat(peak_day))}.</desc>',
-        # The stacked edges under the card, as on the site.
-        f'<rect x="8" y="14" width="{width - 16}" height="{height}" rx="20" fill="#645443"/>',
-        f'<rect x="4" y="7" width="{width - 8}" height="{height}" rx="21" fill="#453b31"/>',
-        f'<rect x="0.5" y="0.5" width="{width - 1}" height="{height - 1}" rx="22" fill="{BG}" stroke="{EDGE}"/>',
-        f'<rect x="{pad}" y="{pad}" width="32" height="32" rx="8" fill="#35302b" stroke="{EDGE}"/>',
+        "<style>"
+        + font_faces(
+            ("DM Sans", "dmsans-400.woff2", 400, "normal"),
+            ("DM Sans", "dmsans-500.woff2", 500, "normal"),
+            ("DM Sans", "dmsans-600.woff2", 600, "normal"),
+        )
+        + "text{font-family:'DM Sans',-apple-system,'Segoe UI',sans-serif}"
+        ".live{animation:breathe 2.4s ease-in-out infinite}@keyframes breathe{50%{opacity:.25}}"
+        "@media (prefers-reduced-motion:reduce){.live{animation:none}}"
+        "</style>",
+        f'<rect x="0.5" y="0.5" width="{width - 1}" height="{height - 1}" rx="24" fill="{BG}" stroke="{EDGE}"/>',
+        f'<rect x="{pad}" y="30" width="36" height="36" rx="9" fill="#35302b" stroke="{EDGE}"/>',
     ]
     for i in range(8):
-        inner, outer = (3.5, 10) if i % 2 == 0 else (3.5, 7.5)
+        outer = 11 if i % 2 == 0 else 8.5
         out.append(
-            f'<line x1="41" y1="{41 - inner}" x2="41" y2="{41 - outer}" stroke="{LEVELS[3]}" '
-            f'stroke-width="2.2" stroke-linecap="round" transform="rotate({i * 45} 41 41)"/>'
+            f'<line x1="50" y1="44" x2="50" y2="{48 - outer}" stroke="{LEVELS[3]}" '
+            f'stroke-width="2.4" stroke-linecap="round" transform="rotate({i * 45} 50 48)"/>'
         )
     out += [
-        f'<text x="67" y="39" fill="{INK}" font-size="14" font-weight="600">Claude Code activity</text>',
-        f'<text x="67" y="54" fill="{MUTED}" font-size="10">Last 12 months</text>',
-        f'<text x="{width - pad}" y="45" fill="{MUTED}" font-size="10" text-anchor="end">'
-        f'<tspan fill="{LEVELS[3]}">●</tspan>  Updated daily</text>',
-        f'<path d="M{pad} 77.5H{width - pad}M{pad} 172.5H{width - pad}" stroke="{EDGE}"/>',
+        f'<text x="82" y="45" fill="{INK}" font-size="16" font-weight="600">Claude Code activity</text>',
+        f'<text x="82" y="62" fill="{MUTED}" font-size="12">Last 12 months</text>',
+        f'<circle class="live" cx="{width - pad - 88}" cy="47" r="3" fill="{LEVELS[3]}"/>',
+        f'<text x="{width - pad}" y="51" fill="{MUTED}" font-size="12" text-anchor="end">Updated daily</text>',
+        f'<path d="M{pad} 90.5H{width - pad}M{pad} 204.5H{width - pad}" stroke="{EDGE}"/>',
     ]
 
     unit = (width - 2 * pad) / 3.2
     columns = [pad, pad + 1.2 * unit, pad + 2.2 * unit]
     stats = [
-        ("TOTAL TOKENS", short(total), f"since {long_date(first_day)}", 40),
-        ("DAILY AVG", short(total / len(active)), "per active day", 28),
-        ("PEAK", short(active[peak_day]["tokens"]), long_date(date.fromisoformat(peak_day)), 28),
+        ("TOTAL TOKENS", short(total), f"since {long_date(first_day)}", 54),
+        ("DAILY AVG", short(total / len(active)), "per active day", 36),
+        ("PEAK", short(active[peak_day]["tokens"]), long_date(date.fromisoformat(peak_day)), 36),
     ]
     for index, (label, value, note, size) in enumerate(stats):
-        x = columns[index] + (0 if index == 0 else 16)
+        x = columns[index] + (0 if index == 0 else 22)
         if index:
-            out.append(f'<path d="M{columns[index]:.1f} 77.5V172.5" stroke="{EDGE}"/>')
+            out.append(f'<path d="M{columns[index]:.1f} 90.5V204.5" stroke="{EDGE}"/>')
         out += [
-            f'<text x="{x:.1f}" y="103" fill="{MUTED}" font-size="9.5" font-weight="600" letter-spacing="0.8">{label}</text>',
-            f'<text x="{x:.1f}" y="{103 + size}" fill="{INK}" font-size="{size}" font-weight="500" letter-spacing="-0.5">{value}</text>',
-            f'<text x="{x:.1f}" y="161" fill="{MUTED}" font-size="10">{note}</text>',
+            f'<text x="{x:.1f}" y="121" fill="{MUTED}" font-size="11" font-weight="600" letter-spacing="1">{label}</text>',
+            f'<text x="{x:.1f}" y="{121 + size * 0.93:.0f}" fill="{INK}" font-size="{size}" font-weight="500" letter-spacing="-1">{value}</text>',
+            f'<text x="{x:.1f}" y="188" fill="{MUTED}" font-size="12">{note}</text>',
         ]
 
     for row, name in ((1, "Mon"), (3, "Wed"), (5, "Fri")):
-        out.append(f'<text x="{pad}" y="{grid_y + row * pitch + cell - 0.5}" fill="{MUTED}" font-size="9.5">{name}</text>')
+        out.append(f'<text x="{pad}" y="{grid_y + row * pitch + 9.5:.1f}" fill="{MUTED}" font-size="11">{name}</text>')
 
     markers: list[tuple[int, str]] = []
     for week in range(weeks):
@@ -156,7 +176,7 @@ def render(days: dict[str, dict[str, int]], today: date) -> str:
     for index, (week, label) in enumerate(markers):
         if index + 1 < len(markers) and markers[index + 1][0] - week < 4:
             continue
-        out.append(f'<text x="{grid_x + week * pitch:.1f}" y="218" fill="{MUTED}" font-size="9.5">{label}</text>')
+        out.append(f'<text x="{grid_x + week * pitch:.1f}" y="246" fill="{MUTED}" font-size="11">{label}</text>')
 
     for offset in range(weeks * 7):
         day = calendar_start + timedelta(days=offset)
@@ -166,14 +186,14 @@ def render(days: dict[str, dict[str, int]], today: date) -> str:
         level = 0 if tokens == 0 else 1 + sum(tokens > t for t in thresholds)
         fill = EMPTY if level == 0 else LEVELS[level - 1]
         x, y = grid_x + (offset // 7) * pitch, grid_y + (offset % 7) * pitch
-        out.append(f'<rect x="{x:.1f}" y="{y:.1f}" width="{cell}" height="{cell}" rx="2" fill="{fill}"/>')
+        out.append(f'<rect x="{x:.1f}" y="{y:.1f}" width="{cell}" height="{cell}" rx="2.5" fill="{fill}"/>')
 
     out += [
-        f'<path d="M{pad} 325.5H{width - pad}" stroke="{EDGE}"/>',
-        f'<text x="{pad}" y="349" fill="{MUTED}" font-size="10">'
+        f'<path d="M{pad} 388.5H{width - pad}" stroke="{EDGE}"/>',
+        f'<text x="{pad}" y="418" fill="{MUTED}" font-size="12">'
         f'<tspan fill="{INK}" font-weight="600">{len(active)}</tspan> active days  ·  '
         f'<tspan fill="{INK}" font-weight="600">{short(written)}</tspan> tokens written by Claude</text>',
-        f'<text x="{width - pad}" y="349" fill="{MUTED}" font-size="10" text-anchor="end">Counted from Claude Code sessions</text>',
+        f'<text x="{width - pad}" y="418" fill="{MUTED}" font-size="12" text-anchor="end">Counted from Claude Code sessions</text>',
         "</svg>",
     ]
     return "\n".join(out) + "\n"

@@ -1,19 +1,19 @@
 <div align="center">
 
-# Yash Khambhatta
-
-I build stuff I find interesting.
-
-Full-stack engineer at AIVID Techvision · Ahmedabad, India
-
-<br>
-
-<img src="assets/claude-activity.svg" width="640" alt="Claude Code activity: total tokens, daily average, peak day, and a daily heatmap of the last 12 months">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/hero-dark.svg">
+  <img src="assets/hero-light.svg" width="100%" alt="Yash Khambhatta. I build stuff I find interesting. Full-stack engineer at AIVID Techvision, Ahmedabad, India.">
+</picture>
 
 <br>
 <br>
 
-<img src="assets/stack.svg" width="460" alt="TypeScript, React, Next.js, Node.js, Python, FastAPI, PostgreSQL, MongoDB, Redis, Docker">
+<img src="assets/claude-activity.svg" width="100%" alt="Claude Code activity: total tokens, daily average, peak day, and a daily heatmap of the last 12 months">
+
+<br>
+<br>
+
+<img src="assets/stack.svg" width="440" alt="TypeScript, React, Next.js, Node.js, Python, FastAPI, PostgreSQL, MongoDB, Redis, Docker">
 
 <br>
 <br>
