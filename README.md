@@ -8,7 +8,12 @@
 <br>
 <br>
 
-<img src="assets/claude-activity.svg" width="100%" alt="Claude Code activity: total tokens, daily average, peak day, and a daily heatmap of the last 12 months">
+<a href="https://yash456k.github.io/Yash456k/">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/activity-dark.svg">
+  <img src="assets/activity-light.svg" width="100%" alt="Daily tokens with Claude Code and Codex over the last year, as a contribution graph. Opens the interactive view.">
+</picture>
+</a>
 
 <br>
 <br>

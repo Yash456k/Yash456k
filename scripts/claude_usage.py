@@ -1,13 +1,17 @@
 #!/usr/bin/env python3
-"""Count daily Claude Code tokens and draw the activity card on the profile README.
+"""Count daily AI coding tokens (Claude Code and Codex) and draw the activity graph.
 
 Claude Code writes every session to ~/.claude/projects/**/*.jsonl, and each reply
 there carries its token usage. This script adds those up per day across the WSL
-and Windows installs, merges them into data/claude-usage.json, and redraws
-assets/claude-activity.svg. Claude Code deletes transcripts after 30 days, so the
-history file is the record: a day keeps its largest count ever seen.
+and Windows installs. Codex daily totals come from the public activity API behind
+yash456k.com, which the Hermes server refreshes nightly.
 
-Run with --push to commit and push the card when it changes.
+Both go into data/usage.json, which the interactive page (index.html) reads, and
+the README graph is redrawn as assets/activity-{light,dark}.svg. Claude Code
+deletes transcripts after 30 days and the API only covers the last year, so the
+history file is the record: each day keeps its largest count ever seen.
+
+Run with --push to commit and push when anything changed.
 """
 
 from __future__ import annotations
@@ -18,20 +22,30 @@ import glob
 import json
 import os
 import subprocess
+import sys
 from datetime import date, datetime, timedelta
 from pathlib import Path
+from urllib.request import Request, urlopen
 from zoneinfo import ZoneInfo
 
 REPO = Path(__file__).resolve().parents[1]
-HISTORY_PATH = REPO / "data" / "claude-usage.json"
-CARD_PATH = REPO / "assets" / "claude-activity.svg"
+HISTORY_PATH = REPO / "data" / "usage.json"
+CARD_PATHS = {theme: REPO / "assets" / f"activity-{theme}.svg" for theme in ("light", "dark")}
 FONT_DIR = REPO / "assets" / "fonts"
 TRANSCRIPT_ROOTS = [os.path.expanduser("~/.claude/projects"), *glob.glob("/mnt/c/Users/*/.claude/projects")]
+CODEX_URL = "https://api.yash456k.com/v1/activity"
+PAGE_URL = "https://yash456k.github.io/Yash456k/"
 TZ = ZoneInfo("Asia/Kolkata")
 
-# Colors follow the activity card on yash456k.com, in a terracotta ramp for Claude.
-BG, EDGE, INK, MUTED, EMPTY = "#292623", "#4b443d", "#fffaf0", "#c8beb3", "#322e2a"
-LEVELS = ["#55372e", "#8f4c38", "#c0654a", "#f59a74"]
+# GitHub's own colors for text and lines, so the graph sits in the README like its
+# contribution graph does, with the warm ramp of the activity card on yash456k.com.
+THEMES = {
+    "light": {"ink": "#1f2328", "muted": "#59636e", "edge": "#d1d9e0", "link": "#0969da",
+              "empty": "#eff2f5", "levels": ["#fcd9c5", "#f4a47f", "#de6d47", "#a8452a"]},
+    "dark": {"ink": "#f0f6fc", "muted": "#9198a1", "edge": "#3d444d", "link": "#4493f8",
+             "empty": "#151b23", "levels": ["#4a2a1f", "#8a4430", "#c8623f", "#f59a74"]},
+}
+FONT = "-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans',Helvetica,Arial,sans-serif"
 
 
 def font_faces(*faces: tuple[str, str, int, str]) -> str:
@@ -46,7 +60,7 @@ def font_faces(*faces: tuple[str, str, int, str]) -> str:
     return "".join(css)
 
 
-def scan_transcripts() -> dict[str, dict[str, int]]:
+def scan_claude() -> dict[str, dict[str, int]]:
     days: dict[str, dict[str, int]] = {}
     seen: set[tuple[str, str]] = set()
     for root in TRANSCRIPT_ROOTS:
@@ -67,9 +81,9 @@ def scan_transcripts() -> dict[str, dict[str, int]]:
                         continue
                     seen.add(key)
                     day = datetime.fromisoformat(entry["timestamp"].replace("Z", "+00:00")).astimezone(TZ)
-                    totals = days.setdefault(day.date().isoformat(), {"tokens": 0, "written": 0})
-                    totals["written"] += usage.get("output_tokens", 0)
-                    totals["tokens"] += (
+                    totals = days.setdefault(day.date().isoformat(), {"claude": 0, "claude_written": 0})
+                    totals["claude_written"] += usage.get("output_tokens", 0)
+                    totals["claude"] += (
                         usage.get("input_tokens", 0)
                         + usage.get("output_tokens", 0)
                         + usage.get("cache_creation_input_tokens", 0)
@@ -78,12 +92,30 @@ def scan_transcripts() -> dict[str, dict[str, int]]:
     return days
 
 
-def merge(history: dict[str, dict[str, int]], scanned: dict[str, dict[str, int]]) -> dict[str, dict[str, int]]:
-    merged = dict(history)
-    for day, totals in scanned.items():
-        if totals["tokens"] >= merged.get(day, {}).get("tokens", 0):
-            merged[day] = totals
+def fetch_codex() -> dict[str, dict[str, int]]:
+    """Codex days from the public API; on failure keep the history and say so."""
+    try:
+        request = Request(CODEX_URL, headers={"User-Agent": "Yash456k profile graph"})
+        with urlopen(request, timeout=30) as response:  # noqa: S310 - fixed HTTPS URL
+            days = json.load(response)["codex"]["days"]
+        return {day["date"]: {"codex": int(day["tokens"])} for day in days}
+    except Exception as error:  # noqa: BLE001 - a stale Codex count must not stop the Claude update
+        print(f"Codex fetch failed, keeping saved days: {error}", file=sys.stderr)
+        return {}
+
+
+def merge(history: dict[str, dict[str, int]], *sources: dict[str, dict[str, int]]) -> dict[str, dict[str, int]]:
+    merged = {day: dict(totals) for day, totals in history.items()}
+    for source in sources:
+        for day, totals in source.items():
+            saved = merged.setdefault(day, {})
+            for field, value in totals.items():
+                saved[field] = max(saved.get(field, 0), value)
     return dict(sorted(merged.items()))
+
+
+def total(totals: dict[str, int]) -> int:
+    return totals.get("claude", 0) + totals.get("codex", 0)
 
 
 def short(n: float) -> str:
@@ -93,80 +125,40 @@ def short(n: float) -> str:
     return str(int(n))
 
 
-def long_date(day: date) -> str:
-    return f"{day:%b} {day.day}, {day.year}"
-
-
-def render(days: dict[str, dict[str, int]], today: date) -> str:
-    active = {day: totals for day, totals in days.items() if totals["tokens"] > 0}
-    total = sum(t["tokens"] for t in active.values())
-    written = sum(t["written"] for t in active.values())
-    peak_day = max(active, key=lambda d: active[d]["tokens"])
-    first_day = date.fromisoformat(min(active))
-
-    # Same banding as the site: ordinary days stay quiet, the top 5% light up.
-    counts = sorted(t["tokens"] for t in active.values())
-    thresholds = [counts[int((len(counts) - 1) * f)] for f in (0.5, 0.75, 0.95)]
-
-    width, height, pad = 860, 446, 32
-    pitch, cell, weeks = 14.35, 11, 53
-    grid_x, grid_y = pad + 34, 258
+def render(days: dict[str, dict[str, int]], today: date, theme: str) -> str:
+    """A contribution graph for the last 12 months, laid out like GitHub's."""
+    colors = THEMES[theme]
+    weeks, pitch, cell = 53, 15, 11
     calendar_end = today + timedelta(days=(5 - today.weekday()) % 7)  # through Saturday
     calendar_start = calendar_end - timedelta(days=weeks * 7 - 1)
+    year = {day: t for day, t in days.items() if calendar_start.isoformat() <= day <= today.isoformat() and total(t)}
+    claude = sum(t.get("claude", 0) for t in year.values())
+    codex = sum(t.get("codex", 0) for t in year.values())
 
+    # Same banding as the site: ordinary days stay quiet, the top 5% light up.
+    counts = sorted(total(t) for t in year.values())
+    thresholds = [counts[int((len(counts) - 1) * f)] for f in (0.5, 0.75, 0.95)]
+
+    width, height = 860, 224
+    box_y, left, grid_y = 34, 48, 34 + 40
     out = [
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" '
-        f'viewBox="0 0 {width} {height}" role="img" aria-labelledby="t d">',
-        '<title id="t">Claude Code activity</title>',
-        f'<desc id="d">{short(total)} tokens since {long_date(first_day)}, a daily average of '
-        f'{short(total / len(active))}, and a peak of {short(active[peak_day]["tokens"])} on '
-        f'{long_date(date.fromisoformat(peak_day))}.</desc>',
-        "<style>"
-        + font_faces(
-            ("DM Sans", "dmsans-400.woff2", 400, "normal"),
-            ("DM Sans", "dmsans-500.woff2", 500, "normal"),
-            ("DM Sans", "dmsans-600.woff2", 600, "normal"),
-        )
-        + "text{font-family:'DM Sans',-apple-system,'Segoe UI',sans-serif}"
-        ".live{animation:breathe 2.4s ease-in-out infinite}@keyframes breathe{50%{opacity:.25}}"
-        "@media (prefers-reduced-motion:reduce){.live{animation:none}}"
-        "</style>",
-        f'<rect x="0.5" y="0.5" width="{width - 1}" height="{height - 1}" rx="24" fill="{BG}" stroke="{EDGE}"/>',
-        f'<rect x="{pad}" y="30" width="36" height="36" rx="9" fill="#35302b" stroke="{EDGE}"/>',
+        f'viewBox="0 0 {width} {height}" role="img" aria-labelledby="t">',
+        f'<title id="t">{short(claude + codex)} AI coding tokens in the last year: '
+        f'Claude Code {short(claude)}, Codex {short(codex)}</title>',
+        f"<style>text{{font-family:{FONT}}}</style>",
+        f'<text x="1" y="20" fill="{colors["ink"]}" font-size="16">'
+        f'<tspan font-weight="600">{short(claude + codex)}</tspan> tokens with AI coding agents in the last year</text>',
+        f'<text x="{width - 1}" y="20" fill="{colors["muted"]}" font-size="13" text-anchor="end">'
+        f'Claude Code <tspan fill="{colors["ink"]}" font-weight="600">{short(claude)}</tspan>'
+        f'<tspan dx="10">·</tspan><tspan dx="10">Codex </tspan>'
+        f'<tspan fill="{colors["ink"]}" font-weight="600">{short(codex)}</tspan></text>',
+        f'<rect x="0.5" y="{box_y + 0.5}" width="{width - 1}" height="{height - box_y - 1}" rx="6" '
+        f'fill="none" stroke="{colors["edge"]}"/>',
     ]
-    for i in range(8):
-        outer = 11 if i % 2 == 0 else 8.5
-        out.append(
-            f'<line x1="50" y1="44" x2="50" y2="{48 - outer}" stroke="{LEVELS[3]}" '
-            f'stroke-width="2.4" stroke-linecap="round" transform="rotate({i * 45} 50 48)"/>'
-        )
-    out += [
-        f'<text x="82" y="45" fill="{INK}" font-size="16" font-weight="600">Claude Code activity</text>',
-        f'<text x="82" y="62" fill="{MUTED}" font-size="12">Last 12 months</text>',
-        f'<circle class="live" cx="{width - pad - 88}" cy="47" r="3" fill="{LEVELS[3]}"/>',
-        f'<text x="{width - pad}" y="51" fill="{MUTED}" font-size="12" text-anchor="end">Updated daily</text>',
-        f'<path d="M{pad} 90.5H{width - pad}M{pad} 204.5H{width - pad}" stroke="{EDGE}"/>',
-    ]
-
-    unit = (width - 2 * pad) / 3.2
-    columns = [pad, pad + 1.2 * unit, pad + 2.2 * unit]
-    stats = [
-        ("TOTAL TOKENS", short(total), f"since {long_date(first_day)}", 54),
-        ("DAILY AVG", short(total / len(active)), "per active day", 36),
-        ("PEAK", short(active[peak_day]["tokens"]), long_date(date.fromisoformat(peak_day)), 36),
-    ]
-    for index, (label, value, note, size) in enumerate(stats):
-        x = columns[index] + (0 if index == 0 else 22)
-        if index:
-            out.append(f'<path d="M{columns[index]:.1f} 90.5V204.5" stroke="{EDGE}"/>')
-        out += [
-            f'<text x="{x:.1f}" y="121" fill="{MUTED}" font-size="11" font-weight="600" letter-spacing="1">{label}</text>',
-            f'<text x="{x:.1f}" y="{121 + size * 0.93:.0f}" fill="{INK}" font-size="{size}" font-weight="500" letter-spacing="-1">{value}</text>',
-            f'<text x="{x:.1f}" y="188" fill="{MUTED}" font-size="12">{note}</text>',
-        ]
 
     for row, name in ((1, "Mon"), (3, "Wed"), (5, "Fri")):
-        out.append(f'<text x="{pad}" y="{grid_y + row * pitch + 9.5:.1f}" fill="{MUTED}" font-size="11">{name}</text>')
+        out.append(f'<text x="16" y="{grid_y + row * pitch + 9.5}" fill="{colors["ink"]}" font-size="12">{name}</text>')
 
     markers: list[tuple[int, str]] = []
     for week in range(weeks):
@@ -174,26 +166,34 @@ def render(days: dict[str, dict[str, int]], today: date) -> str:
         if not markers or markers[-1][1] != f"{middle:%b}":
             markers.append((week, f"{middle:%b}"))
     for index, (week, label) in enumerate(markers):
-        if index + 1 < len(markers) and markers[index + 1][0] - week < 4:
-            continue
-        out.append(f'<text x="{grid_x + week * pitch:.1f}" y="246" fill="{MUTED}" font-size="11">{label}</text>')
+        if index + 1 < len(markers) and markers[index + 1][0] - week < 3:
+            continue  # a short leading month would collide with the next label
+        out.append(f'<text x="{left + week * pitch}" y="{grid_y - 9}" fill="{colors["ink"]}" font-size="12">{label}</text>')
 
     for offset in range(weeks * 7):
         day = calendar_start + timedelta(days=offset)
         if day > today:
             break
-        tokens = active.get(day.isoformat(), {}).get("tokens", 0)
+        tokens = total(year.get(day.isoformat(), {}))
         level = 0 if tokens == 0 else 1 + sum(tokens > t for t in thresholds)
-        fill = EMPTY if level == 0 else LEVELS[level - 1]
-        x, y = grid_x + (offset // 7) * pitch, grid_y + (offset % 7) * pitch
-        out.append(f'<rect x="{x:.1f}" y="{y:.1f}" width="{cell}" height="{cell}" rx="2.5" fill="{fill}"/>')
+        fill = colors["empty"] if level == 0 else colors["levels"][level - 1]
+        out.append(
+            f'<rect x="{left + (offset // 7) * pitch}" y="{grid_y + (offset % 7) * pitch}" '
+            f'width="{cell}" height="{cell}" rx="2" fill="{fill}"/>'
+        )
 
+    footer_y = grid_y + 7 * pitch + 30
+    out.append(
+        f'<text x="16" y="{footer_y}" fill="{colors["link"]}" font-size="12">'
+        f'Explore day by day at yash456k.github.io/Yash456k ↗</text>'
+    )
+    legend_x = width - 16 - 30 - 5 * pitch - 6
+    out.append(f'<text x="{legend_x - 6}" y="{footer_y}" fill="{colors["muted"]}" font-size="12" text-anchor="end">Less</text>')
+    for level in range(5):
+        fill = colors["empty"] if level == 0 else colors["levels"][level - 1]
+        out.append(f'<rect x="{legend_x + level * pitch}" y="{footer_y - 10}" width="{cell}" height="{cell}" rx="2" fill="{fill}"/>')
     out += [
-        f'<path d="M{pad} 388.5H{width - pad}" stroke="{EDGE}"/>',
-        f'<text x="{pad}" y="418" fill="{MUTED}" font-size="12">'
-        f'<tspan fill="{INK}" font-weight="600">{len(active)}</tspan> active days  ·  '
-        f'<tspan fill="{INK}" font-weight="600">{short(written)}</tspan> tokens written by Claude</text>',
-        f'<text x="{width - pad}" y="418" fill="{MUTED}" font-size="12" text-anchor="end">Counted from Claude Code sessions</text>',
+        f'<text x="{legend_x + 5 * pitch + 2}" y="{footer_y}" fill="{colors["muted"]}" font-size="12">More</text>',
         "</svg>",
     ]
     return "\n".join(out) + "\n"
@@ -205,22 +205,25 @@ def git(*args: str) -> str:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--push", action="store_true", help="commit and push when the card changes")
+    parser.add_argument("--push", action="store_true", help="commit and push when anything changed")
     args = parser.parse_args()
 
     if args.push:
         git("pull", "--rebase", "--autostash", "-q")
     history = json.loads(HISTORY_PATH.read_text()) if HISTORY_PATH.exists() else {}
-    days = merge(history, scan_transcripts())
+    days = merge(history, scan_claude(), fetch_codex())
     HISTORY_PATH.parent.mkdir(exist_ok=True)
     HISTORY_PATH.write_text(json.dumps(days, indent=1) + "\n")
-    CARD_PATH.write_text(render(days, datetime.now(TZ).date()))
+    today = datetime.now(TZ).date()
+    for theme, path in CARD_PATHS.items():
+        path.write_text(render(days, today, theme))
 
-    total = sum(t["tokens"] for t in days.values())
-    print(f"{len(days)} active days, {total:,} tokens")
+    claude = sum(t.get("claude", 0) for t in days.values())
+    codex = sum(t.get("codex", 0) for t in days.values())
+    print(f"{len(days)} days: Claude Code {claude:,}, Codex {codex:,} tokens")
     if args.push and git("status", "--porcelain", "data", "assets").strip():
         git("add", "data", "assets")
-        git("commit", "-q", "-m", "Update Claude activity card")
+        git("commit", "-q", "-m", "Update AI activity")
         git("push", "-q", "origin", "HEAD:main")
         print("pushed")
 

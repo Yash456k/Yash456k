@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI coding activity · Yash Khambhatta</title>
+<meta name="description" content="Daily tokens Yash Khambhatta spends with Claude Code and Codex, updated every night.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect x='1' y='1' width='6' height='6' rx='1.5' fill='%23f4a47f'/%3E%3Crect x='9' y='1' width='6' height='6' rx='1.5' fill='%23de6d47'/%3E%3Crect x='1' y='9' width='6' height='6' rx='1.5' fill='%23de6d47'/%3E%3Crect x='9' y='9' width='6' height='6' rx='1.5' fill='%23a8452a'/%3E%3C/svg%3E">
+<style>
+@font-face { font-family: 'Newsreader'; src: url(assets/fonts/newsreader.woff2) format('woff2'); font-weight: 400; font-display: swap; }
+@font-face { font-family: 'Newsreader'; src: url(assets/fonts/newsreader-italic.woff2) format('woff2'); font-weight: 400; font-style: italic; font-display: swap; }
+@font-face { font-family: 'DM Sans'; src: url(assets/fonts/dmsans-400.woff2) format('woff2'); font-weight: 400; font-display: swap; }
+@font-face { font-family: 'DM Sans'; src: url(assets/fonts/dmsans-500.woff2) format('woff2'); font-weight: 500; font-display: swap; }
+@font-face { font-family: 'DM Sans'; src: url(assets/fonts/dmsans-600.woff2) format('woff2'); font-weight: 600; font-display: swap; }
+
+:root {
+  color-scheme: light;
+  --bg: #fbf6ef; --surface: #fffdf9; --ink: #2b2622; --muted: #75685d; --line: #e9dfd3;
+  --empty: #f0e8de; --l1: #f8d4bd; --l2: #f0a37f; --l3: #da6f49; --l4: #a8452a;
+  --claude: #d9714b; --codex: #5d524a; --pressed: #2b2622; --pressed-ink: #fffaf0;
+  --tip: #2b2622; --tip-ink: #fffaf0; --tip-muted: #cfc4b8;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #191715; --surface: #221f1c; --ink: #fffaf0; --muted: #b3a89c; --line: #38322c;
+    --empty: #2d2824; --l1: #573226; --l2: #8f4c38; --l3: #c8623f; --l4: #f59a74;
+    --claude: #e8805a; --codex: #cfc4b8; --pressed: #fffaf0; --pressed-ink: #2b2622;
+    --tip: #fffaf0; --tip-ink: #2b2622; --tip-muted: #75685d;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #191715; --surface: #221f1c; --ink: #fffaf0; --muted: #b3a89c; --line: #38322c;
+  --empty: #2d2824; --l1: #573226; --l2: #8f4c38; --l3: #c8623f; --l4: #f59a74;
+  --claude: #e8805a; --codex: #cfc4b8; --pressed: #fffaf0; --pressed-ink: #2b2622;
+  --tip: #fffaf0; --tip-ink: #2b2622; --tip-muted: #75685d;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 'DM Sans', -apple-system, 'Segoe UI', sans-serif; -webkit-font-smoothing: antialiased; }
+a { color: inherit; text-decoration: none; }
+a:hover { color: var(--claude); }
+button { font: inherit; color: inherit; }
+.page { max-width: 920px; margin: 0 auto; padding: 28px 16px 56px; }
+
+nav { display: flex; justify-content: space-between; align-items: center; font-size: 14px; color: var(--muted); }
+nav .name { font-family: 'Newsreader', Georgia, serif; font-size: 19px; color: var(--ink); }
+
+.intro { margin: 72px 0 40px; }
+.eyebrow { margin: 0 0 10px; font-size: 12px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+h1 { margin: 0; font: 400 clamp(56px, 13vw, 112px)/.95 'Newsreader', Georgia, serif; letter-spacing: -.035em; font-variant-numeric: tabular-nums; }
+h1 em { font-style: italic; color: var(--claude); font-size: .62em; letter-spacing: -.02em; }
+.lede { margin: 16px 0 0; font-size: 18px; color: var(--muted); }
+
+.split { margin-top: 36px; max-width: 560px; }
+.bar { display: flex; height: 10px; border-radius: 99px; overflow: hidden; background: var(--empty); gap: 2px; }
+.bar span { transition: flex-grow .5s cubic-bezier(.2, .8, .2, 1); min-width: 3px; }
+.bar .claude { background: var(--claude); }
+.bar .codex { background: var(--codex); }
+.who { display: flex; gap: 28px; flex-wrap: wrap; margin-top: 14px; font-size: 14px; color: var(--muted); }
+.who b { font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; }
+.dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 8px; vertical-align: 1px; }
+
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 20px; padding: 20px 22px 18px; }
+.toolbar { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
+.seg { display: inline-flex; padding: 3px; gap: 2px; border: 1px solid var(--line); border-radius: 99px; background: var(--bg); }
+.seg button { border: 0; background: none; padding: 5px 13px; border-radius: 99px; font-size: 13px; color: var(--muted); cursor: pointer; transition: background .2s, color .2s; }
+.seg button:hover { color: var(--ink); }
+.seg button[aria-pressed="true"] { background: var(--pressed); color: var(--pressed-ink); }
+.seg button:focus-visible, .grid:focus-visible { outline: 2px solid var(--claude); outline-offset: 2px; }
+
+.scroller { overflow-x: auto; scrollbar-width: thin; padding-bottom: 4px; }
+.heat { display: grid; grid-template-columns: 32px auto; column-gap: 6px; width: max-content; margin: 0 auto; }
+.months, .grid { display: grid; grid-template-columns: repeat(var(--weeks), var(--cell)); gap: var(--gap); }
+.months { grid-column: 2; height: 20px; font-size: 12px; color: var(--muted); }
+.months span { white-space: nowrap; }
+.days { grid-column: 1; grid-row: 2; position: sticky; left: 0; z-index: 2; background: var(--surface); display: grid; grid-template-rows: repeat(7, var(--cell)); gap: var(--gap); font-size: 11px; color: var(--muted); }
+.days span { line-height: var(--cell); }
+.grid { grid-column: 2; grid-row: 2; grid-template-rows: repeat(7, var(--cell)); grid-auto-flow: column; outline: none; border-radius: 4px; }
+.c { border-radius: calc(var(--cell) / 4.5); background: var(--empty); transition: background-color .35s, transform .15s; }
+.c.l1 { background: var(--l1); } .c.l2 { background: var(--l2); } .c.l3 { background: var(--l3); } .c.l4 { background: var(--l4); }
+.c.off { visibility: hidden; }
+.c.on { transform: scale(1.25); box-shadow: 0 0 0 2px var(--surface), 0 0 0 3.5px var(--ink); position: relative; z-index: 1; }
+.legend { display: flex; align-items: center; justify-content: flex-end; gap: 4px; margin-top: 14px; font-size: 12px; color: var(--muted); }
+.legend i { width: 11px; height: 11px; border-radius: 3px; background: var(--empty); }
+.legend span { margin: 0 4px; }
+
+.tip { position: fixed; z-index: 10; pointer-events: none; padding: 9px 12px; border-radius: 12px; background: var(--tip); color: var(--tip-ink); font-size: 13px; line-height: 1.45; white-space: nowrap; box-shadow: 0 10px 30px rgb(0 0 0 / .18); opacity: 0; transform: translateY(4px); transition: opacity .12s, transform .12s; }
+.tip.show { opacity: 1; transform: none; }
+.tip b { font-weight: 600; }
+.tip small { display: block; color: var(--tip-muted); font-size: 12px; }
+
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); margin: 28px 0 0; padding: 0; }
+.stats div { padding: 4px 22px; border-left: 1px solid var(--line); }
+.stats div:first-child { border-left: 0; padding-left: 0; }
+.stats dt { font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.stats dd { margin: 6px 0 0; font: 400 34px/1.1 'Newsreader', Georgia, serif; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.stats small { display: block; margin-top: 4px; font-size: 13px; color: var(--muted); }
+
+footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); max-width: 640px; }
+footer p { margin: 0 0 6px; }
+.error { padding: 40px 0; color: var(--muted); }
+
+@media (max-width: 640px) {
+  .intro { margin: 48px 0 32px; }
+  .card { padding: 16px 14px 14px; border-radius: 16px; }
+  .stats { grid-template-columns: 1fr 1fr; row-gap: 22px; }
+  .stats div:nth-child(3) { border-left: 0; padding-left: 0; }
+  .stats div { padding: 4px 16px; }
+  .stats dd { font-size: 28px; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="page">
+  <nav>
+    <a class="name" href="https://github.com/Yash456k">Yash Khambhatta</a>
+    <a href="https://www.yash456k.com">yash456k.com ↗</a>
+  </nav>
+
+  <section class="intro">
+    <p class="eyebrow">AI coding activity</p>
+    <h1><span id="total">—</span> <em>tokens</em></h1>
+    <p class="lede" id="lede">&nbsp;</p>
+    <div class="split" aria-hidden="true">
+      <div class="bar"><span class="claude" id="bar-claude"></span><span class="codex" id="bar-codex"></span></div>
+    </div>
+    <div class="who">
+      <span><i class="dot" style="background:var(--claude)"></i>Claude Code <b id="claude">—</b></span>
+      <span><i class="dot" style="background:var(--codex)"></i>Codex <b id="codex">—</b></span>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="toolbar">
+      <div class="seg" role="group" aria-label="Agent" id="source">
+        <button data-v="both" aria-pressed="true">Both</button>
+        <button data-v="claude" aria-pressed="false">Claude Code</button>
+        <button data-v="codex" aria-pressed="false">Codex</button>
+      </div>
+      <div class="seg" role="group" aria-label="Range" id="range">
+        <button data-v="13" aria-pressed="false">3M</button>
+        <button data-v="26" aria-pressed="false">6M</button>
+        <button data-v="53" aria-pressed="true">1Y</button>
+      </div>
+    </div>
+    <div class="scroller" id="scroller">
+      <div class="heat">
+        <div class="months" id="months"></div>
+        <div class="days"><span></span><span>Mon</span><span></span><span>Wed</span><span></span><span>Fri</span><span></span></div>
+        <div class="grid" id="grid" tabindex="0" role="img" aria-label="Daily tokens heatmap. Use arrow keys to read days."></div>
+      </div>
+    </div>
+    <div class="legend">Less<span></span><i></i><i style="background:var(--l1)"></i><i style="background:var(--l2)"></i><i style="background:var(--l3)"></i><i style="background:var(--l4)"></i><span></span>More</div>
+  </section>
+
+  <dl class="stats">
+    <div><dt>Active days</dt><dd id="s-active">—</dd><small id="s-active-n">&nbsp;</small></div>
+    <div><dt>Daily average</dt><dd id="s-avg">—</dd><small>per active day</small></div>
+    <div><dt>Peak day</dt><dd id="s-peak">—</dd><small id="s-peak-n">&nbsp;</small></div>
+    <div><dt>Longest streak</dt><dd id="s-streak">—</dd><small id="s-streak-n">&nbsp;</small></div>
+  </dl>
+
+  <footer>
+    <p>Every token counts: input, output and cached context. Claude Code numbers come from its session logs, Codex numbers from its usage stats.</p>
+    <p id="updated">Updated nightly.</p>
+  </footer>
+</div>
+<div class="tip" id="tip" role="status"></div>
+
+<script>
+const $ = id => document.getElementById(id);
+const DAY = 864e5;
+const state = { source: 'both', weeks: 53, days: {}, cells: [], focus: -1 };
+
+const short = n => {
+  for (const [size, suffix, digits] of [[1e9, 'B', 2], [1e6, 'M', 1], [1e3, 'K', 1]]) if (n >= size) return (n / size).toFixed(digits) + suffix;
+  return String(Math.round(n));
+};
+const iso = t => new Date(t).toISOString().slice(0, 10);
+const time = s => Date.parse(s + 'T00:00:00Z');
+const longDate = s => new Date(time(s)).toLocaleDateString('en', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
+const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata' }).format(new Date());
+const value = (d, source = state.source) => !d ? 0 : source === 'both' ? (d.claude || 0) + (d.codex || 0) : d[source] || 0;
+
+// Count up to a number instead of jumping, the way a dial settles.
+const tweens = new Map();
+function animate(el, to, format = short) {
+  const from = tweens.get(el) ?? 0;
+  tweens.set(el, to);
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches || !from) { el.textContent = format(to); return; }
+  const start = performance.now();
+  const step = now => {
+    if (tweens.get(el) !== to) return;
+    const k = Math.min(1, (now - start) / 450), e = 1 - Math.pow(1 - k, 3);
+    el.textContent = format(from + (to - from) * e);
+    if (k < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+
+function render() {
+  const end = time(today) + ((6 - new Date(time(today)).getUTCDay()) * DAY); // through Saturday
+  const start = end - (state.weeks * 7 - 1) * DAY;
+  const range = [];
+  for (let t = start; t <= end; t += DAY) range.push(iso(t));
+  const past = range.filter(d => d <= today);
+
+  // Same banding as the site: ordinary days stay quiet, the top 5% light up.
+  const counts = past.map(d => value(state.days[d])).filter(Boolean).sort((a, b) => a - b);
+  const q = f => counts[Math.floor((counts.length - 1) * f)] ?? 0;
+  const thresholds = [q(.5), q(.75), q(.95)];
+
+  // Cell size fills the card on wide screens; a phone scrolls a year sideways.
+  const room = $('scroller').clientWidth - 38;
+  const pitch = Math.max(13, Math.min(26, Math.floor(room / state.weeks)));
+  const gap = pitch >= 18 ? 4 : 3;
+  for (const el of [$('grid'), $('months')]) {
+    el.style.setProperty('--weeks', state.weeks);
+    el.style.setProperty('--cell', pitch - gap + 'px');
+    el.style.setProperty('--gap', gap + 'px');
+  }
+  document.querySelector('.days').style.setProperty('--cell', pitch - gap + 'px');
+  document.querySelector('.days').style.setProperty('--gap', gap + 'px');
+
+  const grid = $('grid');
+  grid.textContent = '';
+  state.cells = range.map(d => {
+    const cell = document.createElement('div');
+    const n = value(state.days[d]);
+    const level = n ? 1 + thresholds.filter(t => n > t).length : 0;
+    cell.className = 'c' + (d > today ? ' off' : level ? ' l' + level : '');
+    cell.dataset.date = d;
+    grid.append(cell);
+    return cell;
+  });
+  state.focus = -1;
+
+  const months = $('months');
+  months.textContent = '';
+  let last = '', marks = [];
+  for (let w = 0; w < state.weeks; w++) {
+    const middle = new Date(start + (w * 7 + 3) * DAY);
+    const label = middle.toLocaleDateString('en', { month: 'short', timeZone: 'UTC' });
+    if (label !== last) marks.push([w, label]);
+    last = label;
+  }
+  marks.filter((m, i) => !marks[i + 1] || marks[i + 1][0] - m[0] >= 3).forEach(([w, label]) => {
+    const span = document.createElement('span');
+    span.textContent = label;
+    span.style.gridColumn = w + 1;
+    months.append(span);
+  });
+  $('scroller').scrollLeft = $('scroller').scrollWidth;
+
+  // Totals and stats for the visible range.
+  const claude = past.reduce((sum, d) => sum + value(state.days[d], 'claude'), 0);
+  const codex = past.reduce((sum, d) => sum + value(state.days[d], 'codex'), 0);
+  const total = state.source === 'both' ? claude + codex : state.source === 'claude' ? claude : codex;
+  animate($('total'), total);
+  animate($('claude'), claude);
+  animate($('codex'), codex);
+  $('bar-claude').style.flexGrow = state.source === 'codex' ? 0 : claude;
+  $('bar-codex').style.flexGrow = state.source === 'claude' ? 0 : codex;
+  const who = { both: 'Claude Code and Codex', claude: 'Claude Code', codex: 'Codex' }[state.source];
+  const span = { 13: 'last 3 months', 26: 'last 6 months', 53: 'last year' }[state.weeks];
+  $('lede').textContent = `with ${who} in the ${span}.`;
+
+  const active = past.filter(d => value(state.days[d]));
+  const peak = active.reduce((best, d) => value(state.days[d]) > value(state.days[best]) ? d : best, active[0]);
+  let run = 0, best = 0, bestEnd = null;
+  for (const d of past) {
+    run = value(state.days[d]) ? run + 1 : 0;
+    if (run > best) { best = run; bestEnd = d; }
+  }
+  animate($('s-active'), active.length, n => String(Math.round(n)));
+  $('s-active-n').textContent = `of ${past.length} days`;
+  animate($('s-avg'), active.length ? total / active.length : 0);
+  $('s-peak').textContent = peak ? short(value(state.days[peak])) : '—';
+  $('s-peak-n').textContent = peak ? longDate(peak) : 'no activity yet';
+  animate($('s-streak'), best, n => Math.round(n) + (Math.round(n) === 1 ? ' day' : ' days'));
+  $('s-streak-n').textContent = bestEnd ? `ending ${longDate(bestEnd)}` : ' ';
+}
+
+function show(cell) {
+  const tip = $('tip');
+  document.querySelector('.c.on')?.classList.remove('on');
+  if (!cell || cell.classList.contains('off')) { tip.classList.remove('show'); return; }
+  cell.classList.add('on');
+  const d = state.days[cell.dataset.date];
+  const n = value(d);
+  tip.innerHTML = '';
+  const head = document.createElement('div');
+  head.innerHTML = `<b></b> on <span></span>`;
+  head.querySelector('b').textContent = n ? `${short(n)} tokens` : 'No tokens';
+  head.querySelector('span').textContent = longDate(cell.dataset.date);
+  tip.append(head);
+  if (state.source === 'both' && n) {
+    const split = document.createElement('small');
+    split.textContent = [['Claude Code', d.claude], ['Codex', d.codex]].filter(([, n]) => n).map(([name, n]) => `${name} ${short(n)}`).join(' · ');
+    tip.append(split);
+  }
+  const box = cell.getBoundingClientRect();
+  tip.classList.add('show');
+  const w = tip.offsetWidth, h = tip.offsetHeight;
+  tip.style.left = Math.max(8, Math.min(innerWidth - w - 8, box.left + box.width / 2 - w / 2)) + 'px';
+  tip.style.top = (box.top - h - 10 < 8 ? box.bottom + 10 : box.top - h - 10) + 'px';
+}
+
+const grid = $('grid');
+grid.addEventListener('pointerover', e => { if (e.target.classList.contains('c')) show(e.target); });
+grid.addEventListener('pointerdown', e => { if (e.target.classList.contains('c')) show(e.target); });
+grid.addEventListener('pointerleave', e => { if (e.pointerType === 'mouse') show(null); });
+grid.addEventListener('blur', () => show(null));
+grid.addEventListener('keydown', e => {
+  const move = { ArrowUp: -1, ArrowDown: 1, ArrowLeft: -7, ArrowRight: 7 }[e.key];
+  if (move === undefined) return;
+  e.preventDefault();
+  const lastPast = state.cells.findLastIndex(c => !c.classList.contains('off'));
+  const next = state.focus < 0 ? lastPast : Math.max(0, Math.min(lastPast, state.focus + move));
+  state.focus = next;
+  state.cells[next].scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  show(state.cells[next]);
+});
+addEventListener('scroll', () => show(null), { passive: true });
+$('scroller').addEventListener('scroll', () => show(null), { passive: true });
+
+for (const [group, key, parse] of [['source', 'source', String], ['range', 'weeks', Number]]) {
+  $(group).addEventListener('click', e => {
+    const button = e.target.closest('button');
+    if (!button) return;
+    for (const b of $(group).children) b.setAttribute('aria-pressed', b === button);
+    state[key] = parse(button.dataset.v);
+    show(null);
+    render();
+  });
+}
+let width = innerWidth;
+addEventListener('resize', () => { if (innerWidth !== width) { width = innerWidth; render(); } });
+
+fetch('data/usage.json', { cache: 'no-cache' })
+  .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+  .then(days => {
+    state.days = days;
+    const latest = Object.keys(days).filter(d => value(days[d], 'both')).sort().pop();
+    if (latest) $('updated').textContent = `Updated nightly. Latest day counted: ${longDate(latest)}.`;
+    render();
+  })
+  .catch(() => {
+    document.querySelector('.card').outerHTML = '<p class="error">Couldn’t load the activity data. Try again in a moment.</p>';
+  });
+</script>
+</body>
+</html>
