@@ -1,8 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="860" height="224" viewBox="0 0 860 224" role="img" aria-labelledby="t">
-<title id="t">12.31B AI coding tokens in the last year: Claude Code 1.47B, Codex 10.84B</title>
+<title id="t">12.34B AI coding tokens in the last year: Claude Code 1.47B, Codex 10.87B</title>
 <style>text{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans',Helvetica,Arial,sans-serif}</style>
-<text x="1" y="20" fill="#1f2328" font-size="16"><tspan font-weight="600">12.31B</tspan> tokens with AI coding agents in the last year</text>
-<text x="859" y="20" fill="#59636e" font-size="13" text-anchor="end">Claude Code <tspan fill="#1f2328" font-weight="600">1.47B</tspan><tspan dx="10">·</tspan><tspan dx="10">Codex </tspan><tspan fill="#1f2328" font-weight="600">10.84B</tspan></text>
+<text x="1" y="20" fill="#1f2328" font-size="16"><tspan font-weight="600">12.34B</tspan> tokens with AI coding agents in the last year</text>
+<text x="859" y="20" fill="#59636e" font-size="13" text-anchor="end">Claude Code <tspan fill="#1f2328" font-weight="600">1.47B</tspan><tspan dx="10">·</tspan><tspan dx="10">Codex </tspan><tspan fill="#1f2328" font-weight="600">10.87B</tspan></text>
 <rect x="0.5" y="34.5" width="859" height="189" rx="6" fill="none" stroke="#d1d9e0"/>
 <text x="16" y="98.5" fill="#1f2328" font-size="12">Mon</text>
 <text x="16" y="128.5" fill="#1f2328" font-size="12">Wed</text>
@@ -258,7 +258,7 @@
 <rect x="543" y="134" width="11" height="11" rx="2" fill="#f4a47f"/>
 <rect x="543" y="149" width="11" height="11" rx="2" fill="#f4a47f"/>
 <rect x="543" y="164" width="11" height="11" rx="2" fill="#fcd9c5"/>
-<rect x="558" y="74" width="11" height="11" rx="2" fill="#fcd9c5"/>
+<rect x="558" y="74" width="11" height="11" rx="2" fill="#f4a47f"/>
 <rect x="558" y="89" width="11" height="11" rx="2" fill="#a8452a"/>
 <rect x="558" y="104" width="11" height="11" rx="2" fill="#de6d47"/>
 <rect x="558" y="119" width="11" height="11" rx="2" fill="#f4a47f"/>
@@ -385,6 +385,7 @@
 <rect x="813" y="149" width="11" height="11" rx="2" fill="#de6d47"/>
 <rect x="813" y="164" width="11" height="11" rx="2" fill="#a8452a"/>
 <rect x="828" y="74" width="11" height="11" rx="2" fill="#a8452a"/>
+<rect x="828" y="89" width="11" height="11" rx="2" fill="#fcd9c5"/>
 <text x="16" y="209" fill="#0969da" font-size="12">Explore day by day at yash456k.github.io/Yash456k ↗</text>
 <text x="727" y="209" fill="#59636e" font-size="12" text-anchor="end">Less</text>
 <rect x="733" y="199" width="11" height="11" rx="2" fill="#eff2f5"/>

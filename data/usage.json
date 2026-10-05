@@ -652,14 +652,20 @@
  "2026-10-02": {
   "claude": 115559961,
   "claude_written": 319367,
-  "codex": 17214283
+  "codex": 19628123
  },
  "2026-10-03": {
   "claude": 297616059,
-  "claude_written": 772397
+  "claude_written": 772397,
+  "codex": 24541039
  },
  "2026-10-04": {
   "claude": 193216920,
-  "claude_written": 889370
+  "claude_written": 889370,
+  "codex": 22594
+ },
+ "2026-10-05": {
+  "claude": 506709,
+  "claude_written": 6068
  }
 }
