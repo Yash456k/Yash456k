@@ -753,10 +753,11 @@
  "2026-11-14": {
   "claude": 392867,
   "claude_written": 5205,
-  "codex": 15228
+  "codex": 247638
  },
  "2026-11-15": {
   "claude": 2812630,
-  "claude_written": 47360
+  "claude_written": 47360,
+  "codex": 891639
  }
 }
